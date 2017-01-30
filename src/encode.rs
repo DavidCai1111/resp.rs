@@ -1,40 +1,36 @@
-const CRLF: str = "\r\n";
-const STRING_PREFIX: str = "+";
-const ERROR_PREFIX: str = "-";
-const INT_PREFIX: str = ":";
-const BULK_PREFIX: str = "$";
-const ARRAY_PREFIX: str = "*";
+pub static CRLF: &'static str = "\r\n";
+pub static STRING_PREFIX: &'static str = "+";
+pub static ERROR_PREFIX: &'static str = "-";
+pub static INT_PREFIX: &'static str = ":";
+pub static BULK_PREFIX: &'static str = "$";
+pub static ARRAY_PREFIX: &'static str = "*";
 
-fn encode_string(string: &str) -> &str {
-    STRING_PREFIX + string + CRLF
+pub fn encode_string(string: &String) -> String {
+    STRING_PREFIX.to_string() + string + &CRLF
 }
 
-fn encode_error(error: std::error::Error) -> &str {
-    ERROR_PREFIX + error.description() + CRLF
+pub fn int32(int: i32) -> String {
+    INT_PREFIX.to_string() + &int.to_string() + &CRLF
 }
 
-fn encode_int32(int: i32) -> &str {
-    INT_PREFIX + int + CRLF
+pub fn int64(int: i64) -> String {
+    INT_PREFIX.to_string() + &int.to_string() + &CRLF
 }
 
-fn encode_int64(int: i64) -> &str {
-    INT_PREFIX + int + CRLF
+pub fn null() -> String {
+    BULK_PREFIX.to_string() + "-1" + &CRLF
 }
 
-fn encode_null() -> &str {
-    BULK_PREFIX + "-1" + CRLF
+pub fn bulk_string(bulk: &str) -> String {
+    BULK_PREFIX.to_string() + &bulk.len().to_string() + &CRLF + bulk + &CRLF
 }
 
-fn encode_bulk_string(bulk: &str) -> &str {
-    BULK_PREFIX + bulk.len() + CRLF + bulk + CRLF
-}
+#[cfg(test)]
+mod test {
+    use super::*;
 
-fn encode_null_array(array: Vec<str>) -> &str {
-    let encoded: str = ARRAY_PREFIX + array.len() + CRLF;
-
-    for s in array {
-        encoded += s;
+    #[test]
+    fn string() {
+        assert_eq!("+test\r\n", encode_string(&"test".to_string()));
     }
-
-    encoded
 }
