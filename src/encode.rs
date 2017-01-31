@@ -1,11 +1,4 @@
-use data::Data;
-
-pub static CRLF: &'static str = "\r\n";
-pub static STRING_PREFIX: &'static str = "+";
-pub static ERROR_PREFIX: &'static str = "-";
-pub static INT_PREFIX: &'static str = ":";
-pub static BULK_PREFIX: &'static str = "$";
-pub static ARRAY_PREFIX: &'static str = "*";
+use data::*;
 
 pub fn encode(d: Data) -> String {
     match d {
