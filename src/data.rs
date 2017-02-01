@@ -8,7 +8,7 @@ pub const ARRAY_PREFIX: u8 = b'*';
 
 pub type Bytes = Vec<u8>;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Data {
     String(String),
     Error(String),
