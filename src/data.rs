@@ -1,14 +1,16 @@
-pub static CRLF: &'static str = "\r\n";
-pub static STRING_PREFIX: &'static str = "+";
-pub static ERROR_PREFIX: &'static str = "-";
-pub static INT_PREFIX: &'static str = ":";
-pub static BULK_PREFIX: &'static str = "$";
-pub static ARRAY_PREFIX: &'static str = "*";
+// Common constants used in RESP.
+pub const CRLF: &'static [u8; 2] = b"\r\n";
+pub const STRING_PREFIX: u8 = b'+';
+pub const ERROR_PREFIX: u8 = b'-';
+pub const INT_PREFIX: u8 = b':';
+pub const BULK_PREFIX: u8 = b'$';
+pub const ARRAY_PREFIX: u8 = b'*';
 
+pub type Bytes = Vec<u8>;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Data {
-    SimpleString(String),
+    String(String),
     Error(String),
     Integer(i64),
     BulkString(String),
