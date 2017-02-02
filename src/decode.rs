@@ -5,18 +5,20 @@ pub fn decode(b: &Bytes) -> Result<Data, &str> {
 }
 
 fn decode_with_last_pos<'a>(b: &Bytes, start: usize) -> (Result<Data, &'a str>, usize) {
+    let invalid_bytes_error: (Result<Data, &str>, usize) = (Err("Invalid bytes"), 0);
+
     match b[start] {
         STRING_PREFIX => {
-            parse(b, start + 1).map_or((Err("Invalid bytes"), 0), |(s, i)| {
+            parse(b, start + 1).map_or(invalid_bytes_error, |(s, i)| {
                 (Ok(Data::String(String::from_utf8(s).unwrap())), i)
             })
         }
         ERROR_PREFIX => {
-            parse(b, start + 1).map_or((Err("Invalid bytes"), 0),
+            parse(b, start + 1).map_or(invalid_bytes_error,
                                        |(e, i)| (Ok(Data::Error(String::from_utf8(e).unwrap())), i))
         }
         INT_PREFIX => {
-            parse(b, start + 1).map_or((Err("Invalid bytes"), 0), |(i, pos)| {
+            parse(b, start + 1).map_or(invalid_bytes_error, |(i, pos)| {
                 (Ok(Data::Integer(String::from_utf8(i)
                      .unwrap()
                      .parse::<i64>()
@@ -25,7 +27,7 @@ fn decode_with_last_pos<'a>(b: &Bytes, start: usize) -> (Result<Data, &'a str>, 
             })
         }
         BULK_PREFIX => {
-            parse(b, start + 1).map_or((Err("Invalid bytes"), 0), |(bl, bulk_start_index)| {
+            parse(b, start + 1).map_or(invalid_bytes_error, |(bl, bulk_start_index)| {
                 let bulk_len: usize = String::from_utf8(bl.to_vec())
                     .unwrap()
                     .parse::<usize>()
@@ -38,7 +40,7 @@ fn decode_with_last_pos<'a>(b: &Bytes, start: usize) -> (Result<Data, &'a str>, 
             })
         }
         ARRAY_PREFIX => {
-            parse(b, start + 1).map_or((Err("Invalid bytes"), 0), |(a, mut pos)| {
+            parse(b, start + 1).map_or(invalid_bytes_error, |(a, mut pos)| {
                 let arr_len: usize = String::from_utf8(a.to_vec())
                     .unwrap()
                     .parse::<usize>()
@@ -46,7 +48,6 @@ fn decode_with_last_pos<'a>(b: &Bytes, start: usize) -> (Result<Data, &'a str>, 
                 let mut result: Vec<Data> = Vec::new();
 
                 for _ in 0..arr_len {
-                    println!("{}", 1);
                     let (res, i) = decode_with_last_pos(b, pos);
                     match res {
                         Ok(data) => {

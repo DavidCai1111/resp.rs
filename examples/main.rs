@@ -1,11 +1,3 @@
-# resp.rs
-[![Build Status](https://travis-ci.org/DavidCai1993/resp.rs.svg?branch=master)](https://travis-ci.org/DavidCai1993/resp.rs)
-
-A RESP (REdis Serialization Protocol) parser for Rust.
-
-## Usage
-
-```rust
 extern crate resp;
 
 use resp::encode;
@@ -24,14 +16,3 @@ fn main() {
                "*3\r\n+s1\r\n+s2\r\n+s3\r\n");
     assert_eq!(decode(&encode(&array)).ok().unwrap(), array);
 }
-```
-
-## API
-
-### pub fn encode(data: Data) -> &Bytes
-
-Encode given data to RESP buffer.
-
-### pub fn decode(bytes: &Bytes) -> Result<Data, &str>
-
-Decode the RESP buffer to real data.
