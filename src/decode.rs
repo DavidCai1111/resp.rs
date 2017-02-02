@@ -1,6 +1,10 @@
 use data::*;
 
-pub fn decode_with_pos<'a>(b: &Bytes, start: usize) -> (Result<Data, &'a str>, usize) {
+pub fn decode(b: &Bytes) -> Result<Data, &str> {
+    decode_with_last_pos(b, 0).0
+}
+
+fn decode_with_last_pos<'a>(b: &Bytes, start: usize) -> (Result<Data, &'a str>, usize) {
     match b[start] {
         STRING_PREFIX => {
             match parse(b, start + 1) {
@@ -53,7 +57,7 @@ pub fn decode_with_pos<'a>(b: &Bytes, start: usize) -> (Result<Data, &'a str>, u
 
                     for _ in 0..arr_len {
                         println!("{}", 1);
-                        let (res, i) = decode_with_pos(b, pos);
+                        let (res, i) = decode_with_last_pos(b, pos);
                         match res {
                             Ok(data) => {
                                 result.push(data);
@@ -91,28 +95,27 @@ mod test {
     #[test]
     fn decode_string() {
         let encoded_string = encode(&Data::String("test".to_string()));
-        assert_eq!(decode_with_pos(&encoded_string, 0).0.ok().unwrap(),
+        assert_eq!(decode(&encoded_string).ok().unwrap(),
                    Data::String("test".to_string()));
     }
 
     #[test]
     fn decode_error() {
         let encoded_error = encode(&Data::Error("test".to_string()));
-        assert_eq!(decode_with_pos(&encoded_error, 0).0.ok().unwrap(),
+        assert_eq!(decode(&encoded_error).ok().unwrap(),
                    Data::Error("test".to_string()));
     }
 
     #[test]
     fn decode_int() {
         let encoded_int = encode(&Data::Integer(888));
-        assert_eq!(decode_with_pos(&encoded_int, 0).0.ok().unwrap(),
-                   Data::Integer(888));
+        assert_eq!(decode(&encoded_int).ok().unwrap(), Data::Integer(888));
     }
 
     #[test]
     fn decode_bulk_string() {
         let encoded_bulk_string = encode(&Data::BulkString("test".to_string()));
-        assert_eq!(decode_with_pos(&encoded_bulk_string, 0).0.ok().unwrap(),
+        assert_eq!(decode(&encoded_bulk_string).ok().unwrap(),
                    Data::BulkString("test".to_string()));
     }
 
@@ -125,7 +128,6 @@ mod test {
         let data_array = Data::Array(array);
 
         let encoded_array = encode(&data_array);
-        assert_eq!(decode_with_pos(&encoded_array, 0).0.ok().unwrap(),
-                   data_array);
+        assert_eq!(decode(&encoded_array).ok().unwrap(), data_array);
     }
 }
