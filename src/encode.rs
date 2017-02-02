@@ -1,53 +1,55 @@
 use data::*;
 
+macro_rules! compose_encoded_res {
+    ($res:ident, $prefix:ident, $bytes:expr) => (
+        $res.push($prefix);
+        $res.extend_from_slice($bytes);
+        $res.extend_from_slice(CRLF);
+    )
+}
+
+macro_rules! compose_encoded_bulk_res {
+    ($res:ident, $prefix:ident, $bytes:ident) => (
+        $res.push($prefix);
+        $res.extend_from_slice($bytes.len().to_string().as_bytes());
+        $res.extend_from_slice(CRLF);
+        $res.extend_from_slice($bytes.as_bytes());
+        $res.extend_from_slice(CRLF);
+    )
+}
+
 pub fn encode(d: &Data) -> Bytes {
-    let mut result: Bytes = Vec::new();
+    let mut res: Bytes = Vec::new();
 
     match *d {
         Data::String(ref s) => {
-            result.push(STRING_PREFIX);
-            result.extend_from_slice(s.as_bytes());
-            result.extend_from_slice(CRLF);
+            compose_encoded_res!(res, STRING_PREFIX, s.as_bytes());
         }
         Data::Integer(ref i) => {
-            result.push(INT_PREFIX);
-            result.extend_from_slice(i.to_string().as_bytes());
-            result.extend_from_slice(CRLF);
+            compose_encoded_res!(res, INT_PREFIX, i.to_string().as_bytes());
         }
         Data::Error(ref e) => {
-            result.push(ERROR_PREFIX);
-            result.extend_from_slice(e.as_bytes());
-            result.extend_from_slice(CRLF);
+            compose_encoded_res!(res, ERROR_PREFIX, e.as_bytes());
         }
         Data::BulkString(ref bs) => {
-            result.push(BULK_PREFIX);
-            result.extend_from_slice(bs.len().to_string().as_bytes());
-            result.extend_from_slice(CRLF);
-            result.extend_from_slice(bs.as_bytes());
-            result.extend_from_slice(CRLF);
+            compose_encoded_bulk_res!(res, BULK_PREFIX, bs);
         }
         Data::Array(ref a) => {
-            result.push(ARRAY_PREFIX);
-            result.extend_from_slice(a.len().to_string().as_bytes());
-            result.extend_from_slice(CRLF);
+            compose_encoded_res!(res, ARRAY_PREFIX, a.len().to_string().as_bytes());
 
             for e in a {
-                result.extend(encode(e).iter().cloned())
+                res.extend(encode(e).iter().cloned())
             }
         }
         Data::Null => {
-            result.push(BULK_PREFIX);
-            result.extend_from_slice(b"-1");
-            result.extend_from_slice(CRLF);
+            compose_encoded_res!(res, BULK_PREFIX, b"-1");
         }
         Data::NullArray => {
-            result.push(ARRAY_PREFIX);
-            result.extend_from_slice(b"-1");
-            result.extend_from_slice(CRLF);
+            compose_encoded_res!(res, ARRAY_PREFIX, b"-1");
         }
     }
 
-    result
+    res
 }
 
 #[cfg(test)]
