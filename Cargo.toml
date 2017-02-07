@@ -1,6 +1,6 @@
 [package]
 name = "resp"
-version = "0.1.0"
+version = "0.0.1"
 description = "A RESP (REdis Serialization Protocol) parser for Rust"
 authors = ["DavidCai <davidcai1993@yahoo.com>"]
 readme = "README.md"
