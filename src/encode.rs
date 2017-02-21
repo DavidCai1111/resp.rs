@@ -18,8 +18,8 @@ macro_rules! compose_encoded_bulk_res {
     )
 }
 
-pub fn encode(d: &Data) -> Bytes {
-    let mut res: Bytes = Vec::new();
+pub fn encode(d: &Data) -> Vec<u8> {
+    let mut res: Vec<u8> = Vec::new();
 
     match *d {
         Data::String(ref s) => {

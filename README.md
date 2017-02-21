@@ -28,10 +28,10 @@ fn main() {
 
 ## API
 
-### `pub fn encode(data: &Data) -> Bytes`
+### `pub fn encode(data: &Data) -> Vec<u8>`
 
 Encode given data to RESP buffer.
 
-### `pub fn decode(bytes: &Bytes) -> Result<Data, &str>`
+### `pub fn decode(bytes: &Vec<u8>) -> Result<Data, &str>`
 
 Decode the RESP buffer to real data.

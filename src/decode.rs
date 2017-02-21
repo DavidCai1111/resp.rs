@@ -1,10 +1,10 @@
 use data::*;
 
-pub fn decode(b: &Bytes) -> Result<Data, &str> {
+pub fn decode(b: &Vec<u8>) -> Result<Data, &str> {
     decode_with_last_pos(b, 0).0
 }
 
-fn decode_with_last_pos<'a>(b: &Bytes, start: usize) -> (Result<Data, &'a str>, usize) {
+fn decode_with_last_pos<'a>(b: &Vec<u8>, start: usize) -> (Result<Data, &'a str>, usize) {
     let invalid_bytes_error: (Result<Data, &str>, usize) = (Err("Invalid bytes"), 0);
 
     match b[start] {
@@ -33,7 +33,7 @@ fn decode_with_last_pos<'a>(b: &Bytes, start: usize) -> (Result<Data, &'a str>, 
                     .parse::<usize>()
                     .unwrap();
                 let bulk_end_index: usize = bulk_start_index + bulk_len;
-                let bulk: Bytes = b[bulk_start_index..bulk_end_index].to_vec();
+                let bulk: Vec<u8> = b[bulk_start_index..bulk_end_index].to_vec();
 
                 (Ok(Data::BulkString(String::from_utf8(bulk).unwrap())),
                  bulk_start_index + bulk_len + 1)
@@ -66,7 +66,7 @@ fn decode_with_last_pos<'a>(b: &Bytes, start: usize) -> (Result<Data, &'a str>, 
     }
 }
 
-fn parse(b: &Bytes, start: usize) -> Option<(Bytes, usize)> {
+fn parse(b: &Vec<u8>, start: usize) -> Option<(Vec<u8>, usize)> {
     for i in start..b.len() - 1 {
         if b[i] == CRLF[0] && b[i + 1] == CRLF[1] {
             return Some((b[start..i].to_vec(), i + 2));
