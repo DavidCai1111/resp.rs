@@ -6,7 +6,6 @@ pub const INT_PREFIX: u8 = b':';
 pub const BULK_PREFIX: u8 = b'$';
 pub const ARRAY_PREFIX: u8 = b'*';
 
-
 #[derive(Debug, Clone, PartialEq)]
 pub enum Data {
     String(String),

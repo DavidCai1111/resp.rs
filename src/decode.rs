@@ -49,12 +49,11 @@ fn decode_with_last_pos<'a>(b: &Vec<u8>, start: usize) -> (Result<Data, &'a str>
 
                 for _ in 0..arr_len {
                     let (res, i) = decode_with_last_pos(b, pos);
-                    match res {
-                        Ok(data) => {
-                            result.push(data);
-                            pos = i;
-                        }
-                        Err(e) => return (Err(e), 0),
+                    if let Ok(data) = res {
+                        result.push(data);
+                        pos = i;
+                    } else if let Err(e) = res {
+                        return (Err(e), 0);
                     }
                 }
 
