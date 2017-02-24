@@ -1,10 +1,10 @@
 // Common constants used in RESP.
-pub const CRLF: &'static [u8; 2] = b"\r\n";
-pub const STRING_PREFIX: u8 = b'+';
-pub const ERROR_PREFIX: u8 = b'-';
-pub const INT_PREFIX: u8 = b':';
-pub const BULK_PREFIX: u8 = b'$';
-pub const ARRAY_PREFIX: u8 = b'*';
+pub const CRLF: &'static str = "\r\n";
+pub const STRING_PREFIX: &'static str = "+";
+pub const ERROR_PREFIX: &'static str = "-";
+pub const INT_PREFIX: &'static str = ":";
+pub const BULK_PREFIX: &'static str = "$";
+pub const ARRAY_PREFIX: &'static str = "*";
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Data {

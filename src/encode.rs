@@ -1,59 +1,31 @@
+use std::convert::From;
 use data::*;
 
-macro_rules! compose_encoded_res {
-    ($res:ident, $prefix:ident, $bytes:expr) => (
-        $res.push($prefix);
-        $res.extend_from_slice($bytes);
-        $res.extend_from_slice(CRLF);
-    )
-}
-
-macro_rules! compose_encoded_bulk_res {
-    ($res:ident, $prefix:ident, $bytes:ident) => (
-        $res.push($prefix);
-        $res.extend_from_slice($bytes.len().to_string().as_bytes());
-        $res.extend_from_slice(CRLF);
-        $res.extend_from_slice($bytes.as_bytes());
-        $res.extend_from_slice(CRLF);
-    )
-}
-
 pub fn encode(d: &Data) -> Vec<u8> {
-    let mut res: Vec<u8> = Vec::new();
-
     match *d {
-        Data::String(ref s) => {
-            compose_encoded_res!(res, STRING_PREFIX, s.as_bytes());
-        }
-        Data::Integer(ref i) => {
-            compose_encoded_res!(res, INT_PREFIX, i.to_string().as_bytes());
-        }
-        Data::Error(ref e) => {
-            compose_encoded_res!(res, ERROR_PREFIX, e.as_bytes());
-        }
+        Data::String(ref s) => From::from(STRING_PREFIX.to_string() + &s + &CRLF),
+        Data::Integer(ref i) => From::from(INT_PREFIX.to_string() + &i.to_string() + &CRLF),
+        Data::Error(ref e) => From::from(ERROR_PREFIX.to_string() + &e + &CRLF),
+        Data::Null => From::from(BULK_PREFIX.to_string() + "-1" + &CRLF),
+        Data::NullArray => From::from(ARRAY_PREFIX.to_string() + "-1" + &CRLF),
         Data::BulkString(ref bs) => {
-            compose_encoded_bulk_res!(res, BULK_PREFIX, bs);
+            From::from(BULK_PREFIX.to_string() + &bs.len().to_string() + &CRLF + &bs + &CRLF)
         }
         Data::Array(ref a) => {
-            compose_encoded_res!(res, ARRAY_PREFIX, a.len().to_string().as_bytes());
+            let mut result: Vec<u8> = From::from(ARRAY_PREFIX.to_string() + &a.len().to_string() +
+                                                 &CRLF);
 
             for e in a {
-                res.extend(encode(e).iter().cloned())
+                result.extend(encode(e).iter().cloned())
             }
-        }
-        Data::Null => {
-            compose_encoded_res!(res, BULK_PREFIX, b"-1");
-        }
-        Data::NullArray => {
-            compose_encoded_res!(res, ARRAY_PREFIX, b"-1");
+
+            result
         }
     }
-
-    res
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use super::*;
 
     #[test]
