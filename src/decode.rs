@@ -25,7 +25,7 @@ pub fn decode(b: &Vec<u8>) -> Result<Data> {
     decode_with_last_pos(b, 0).map(|decoded| decoded.data)
 }
 
-fn decode_with_last_pos<'a>(b: &Vec<u8>, start: usize) -> Result<Decoded> {
+fn decode_with_last_pos(b: &Vec<u8>, start: usize) -> Result<Decoded> {
     match b[start] {
         b'+' => {
             parse(b, start + 1).map_or(Err(DecodeError::InvalidBytes), |(s, i)| {

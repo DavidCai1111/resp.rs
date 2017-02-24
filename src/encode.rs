@@ -3,17 +3,17 @@ use data::*;
 
 pub fn encode(d: &Data) -> Vec<u8> {
     match *d {
-        Data::String(ref s) => From::from(STRING_PREFIX.to_string() + &s + &CRLF),
-        Data::Integer(ref i) => From::from(INT_PREFIX.to_string() + &i.to_string() + &CRLF),
-        Data::Error(ref e) => From::from(ERROR_PREFIX.to_string() + &e + &CRLF),
-        Data::Null => From::from(BULK_PREFIX.to_string() + "-1" + &CRLF),
-        Data::NullArray => From::from(ARRAY_PREFIX.to_string() + "-1" + &CRLF),
+        Data::String(ref s) => From::from(STRING_PREFIX.to_string() + s + CRLF),
+        Data::Integer(ref i) => From::from(INT_PREFIX.to_string() + &i.to_string() + CRLF),
+        Data::Error(ref e) => From::from(ERROR_PREFIX.to_string() + e + CRLF),
+        Data::Null => From::from(BULK_PREFIX.to_string() + "-1" + CRLF),
+        Data::NullArray => From::from(ARRAY_PREFIX.to_string() + "-1" + CRLF),
         Data::BulkString(ref bs) => {
-            From::from(BULK_PREFIX.to_string() + &bs.len().to_string() + &CRLF + &bs + &CRLF)
+            From::from(BULK_PREFIX.to_string() + &bs.len().to_string() + CRLF + bs + CRLF)
         }
         Data::Array(ref a) => {
             let mut result: Vec<u8> = From::from(ARRAY_PREFIX.to_string() + &a.len().to_string() +
-                                                 &CRLF);
+                                                 CRLF);
 
             for e in a {
                 result.extend(encode(e).iter().cloned())
