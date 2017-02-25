@@ -1,5 +1,3 @@
-use std::convert::From;
-use std::error::Error;
 use std::fmt;
 use std::result;
 use data::*;
@@ -28,66 +26,66 @@ pub fn decode(b: &Vec<u8>) -> Result<Data> {
 fn decode_with_last_pos(b: &Vec<u8>, start: usize) -> Result<Decoded> {
     match b[start] {
         b'+' => {
-            parse(b, start + 1).map_or(Err(DecodeError::InvalidBytes), |(s, i)| {
-                Ok(Decoded {
-                    data: Data::String(String::from_utf8(s).unwrap()),
-                    pos: i,
-                })
+            let (s, i) = try!(parse(b, start + 1));
+
+            Ok(Decoded {
+                data: Data::String(String::from_utf8(s).unwrap()),
+                pos: i,
             })
         }
         b'-' => {
-            parse(b, start + 1).map_or(Err(DecodeError::InvalidBytes), |(e, i)| {
-                Ok(Decoded {
-                    data: Data::Error(String::from_utf8(e).unwrap()),
-                    pos: i,
-                })
+            let (e, i) = try!(parse(b, start + 1));
+
+            Ok(Decoded {
+                data: Data::Error(String::from_utf8(e).unwrap()),
+                pos: i,
             })
         }
         b':' => {
-            parse(b, start + 1).map_or(Err(DecodeError::InvalidBytes), |(i, pos)| {
-                Ok(Decoded {
-                    data: Data::Integer(String::from_utf8(i)
-                        .unwrap()
-                        .parse::<i64>()
-                        .unwrap()),
-                    pos: pos,
-                })
+            let (i, pos) = try!(parse(b, start + 1));
+
+            Ok(Decoded {
+                data: Data::Integer(String::from_utf8(i)
+                    .unwrap()
+                    .parse::<i64>()
+                    .unwrap()),
+                pos: pos,
             })
         }
         b'$' => {
-            parse(b, start + 1).map_or(Err(DecodeError::InvalidBytes), |(bl, bulk_start_index)| {
-                let bulk_len: usize = String::from_utf8(bl.to_vec())
-                    .unwrap()
-                    .parse::<usize>()
-                    .unwrap();
-                let bulk_end_index: usize = bulk_start_index + bulk_len;
-                let bulk: Vec<u8> = b[bulk_start_index..bulk_end_index].to_vec();
+            let (bl, bulk_start_index) = try!(parse(b, start + 1));
 
-                Ok(Decoded {
-                    data: Data::BulkString(String::from_utf8(bulk).unwrap()),
-                    pos: bulk_start_index + bulk_len + 1,
-                })
+            let bulk_len: usize = String::from_utf8(bl.to_vec())
+                .unwrap()
+                .parse::<usize>()
+                .unwrap();
+            let bulk_end_index: usize = bulk_start_index + bulk_len;
+            let bulk: Vec<u8> = b[bulk_start_index..bulk_end_index].to_vec();
+
+            Ok(Decoded {
+                data: Data::BulkString(String::from_utf8(bulk).unwrap()),
+                pos: bulk_start_index + bulk_len + 1,
             })
         }
         b'*' => {
-            parse(b, start + 1).map_or(Err(DecodeError::InvalidBytes), |(a, mut pos)| {
-                let arr_len: usize = String::from_utf8(a.to_vec())
-                    .unwrap()
-                    .parse::<usize>()
-                    .unwrap();
-                let mut result: Vec<Data> = Vec::new();
+            let (a, mut pos) = try!(parse(b, start + 1));
 
-                for _ in 0..arr_len {
-                    let data = try!(decode_with_last_pos(b, pos));
-                    result.push(data.data);
-                    pos = data.pos;
+            let arr_len: usize = String::from_utf8(a.to_vec())
+                .unwrap()
+                .parse::<usize>()
+                .unwrap();
+            let mut result: Vec<Data> = Vec::new();
 
-                }
+            for _ in 0..arr_len {
+                let data = try!(decode_with_last_pos(b, pos));
+                result.push(data.data);
+                pos = data.pos;
 
-                Ok(Decoded {
-                    data: Data::Array(result),
-                    pos: pos,
-                })
+            }
+
+            Ok(Decoded {
+                data: Data::Array(result),
+                pos: pos,
             })
         }
         _ => Err(DecodeError::InvalidBytes),
@@ -99,14 +97,14 @@ struct Decoded {
     pos: usize,
 }
 
-fn parse(b: &Vec<u8>, start: usize) -> Option<(Vec<u8>, usize)> {
+fn parse(b: &Vec<u8>, start: usize) -> Result<(Vec<u8>, usize)> {
     for i in start..b.len() - 1 {
         if b[i] == b'\r' && b[i + 1] == b'\n' {
-            return Some((b[start..i].to_vec(), i + 2));
+            return Ok((b[start..i].to_vec(), i + 2));
         }
     }
 
-    None
+    Err(DecodeError::InvalidBytes)
 }
 
 #[cfg(test)]
