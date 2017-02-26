@@ -19,11 +19,11 @@ impl fmt::Display for DecodeError {
     }
 }
 
-pub fn decode(b: &Vec<u8>) -> Result<Data> {
+pub fn decode(b: &[u8]) -> Result<Data> {
     decode_with_last_pos(b, 0).map(|decoded| decoded.data)
 }
 
-fn decode_with_last_pos(b: &Vec<u8>, start: usize) -> Result<Decoded> {
+fn decode_with_last_pos(b: &[u8], start: usize) -> Result<Decoded> {
     match b[start] {
         b'+' => {
             let (s, i) = try!(parse(b, start + 1));
@@ -80,7 +80,6 @@ fn decode_with_last_pos(b: &Vec<u8>, start: usize) -> Result<Decoded> {
                 let data = try!(decode_with_last_pos(b, pos));
                 result.push(data.data);
                 pos = data.pos;
-
             }
 
             Ok(Decoded {
@@ -97,7 +96,7 @@ struct Decoded {
     pos: usize,
 }
 
-fn parse(b: &Vec<u8>, start: usize) -> Result<(Vec<u8>, usize)> {
+fn parse(b: &[u8], start: usize) -> Result<(Vec<u8>, usize)> {
     for i in start..b.len() - 1 {
         if b[i] == b'\r' && b[i + 1] == b'\n' {
             return Ok((b[start..i].to_vec(), i + 2));
