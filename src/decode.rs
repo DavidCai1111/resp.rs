@@ -1,5 +1,6 @@
 use std::fmt;
 use std::result;
+use std::str;
 use data::*;
 
 pub type Result<T> = result::Result<T, DecodeError>;
@@ -97,13 +98,12 @@ struct Decoded {
 }
 
 fn parse(b: &[u8], start: usize) -> Result<(Vec<u8>, usize)> {
-    for i in start..b.len() - 1 {
-        if b[i] == b'\r' && b[i + 1] == b'\n' {
-            return Ok((b[start..i].to_vec(), i + 2));
-        }
+    match str::from_utf8(&b[start..]).unwrap().find("\r\n") {
+        Some(i) => {
+            Ok((b[start..i+start].to_vec(), i + start + 2))
+        },
+        None => Err(DecodeError::InvalidBytes),
     }
-
-    Err(DecodeError::InvalidBytes)
 }
 
 #[cfg(test)]
